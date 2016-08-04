@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -25,7 +24,7 @@ func CheckUAAToken(uaaCheckTokenURL, authStr string) (int, error) {
 	body := []byte("token=" + token)
 	req, err := http.NewRequest("POST", uaaCheckTokenURL, bytes.NewBuffer(body))
 	if err != nil {
-		log.Println(err)
+		return http.StatusInternalServerError, err
 	}
 	req.SetBasicAuth(os.Getenv("UAA_USERNAME"), os.Getenv("UAA_PASSWORD"))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
@@ -35,7 +34,7 @@ func CheckUAAToken(uaaCheckTokenURL, authStr string) (int, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		return http.StatusInternalServerError, err
 	}
 	defer resp.Body.Close()
 
@@ -43,7 +42,7 @@ func CheckUAAToken(uaaCheckTokenURL, authStr string) (int, error) {
 	if resp.StatusCode != http.StatusOK {
 		var payload UAACheckTokenError
 		if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-			log.Println(err)
+			return resp.StatusCode, err
 		}
 		return resp.StatusCode, errors.New(payload.Error)
 	}
