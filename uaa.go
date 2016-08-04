@@ -26,7 +26,11 @@ func VerifyToken(uaaURL, authStr string) (int, error) {
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
+
+	// Set Basic Auth header using env variables
+	// TODO: get username & password from parameters
 	req.SetBasicAuth(os.Getenv("UAA_USERNAME"), os.Getenv("UAA_PASSWORD"))
+
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
 	req.Header.Set("Accept", "application/json;charset=utf-8")
 
