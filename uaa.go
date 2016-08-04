@@ -9,20 +9,20 @@ import (
 	"strings"
 )
 
-// UAACheckTokenError is the json structure returned from UAA
+// VerifyError is the json structure returned from UAA
 // if token is invalid
-type UAACheckTokenError struct {
+type VerifyError struct {
 	Error            string `json:"error"`
 	ErrorDescription string `json:"error_description"`
 }
 
-// CheckUAAToken make a post request to uaaCheckTokenURL
+// VerifyToken make a post request to uaaURL
 // to check whether provided token is valid
-func CheckUAAToken(uaaCheckTokenURL, authStr string) (int, error) {
+func VerifyToken(uaaURL, authStr string) (int, error) {
 	// Prepare HTTP request
 	token := strings.TrimPrefix(authStr, "Bearer ")
 	body := []byte("token=" + token)
-	req, err := http.NewRequest("POST", uaaCheckTokenURL, bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", uaaURL, bytes.NewBuffer(body))
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -40,7 +40,7 @@ func CheckUAAToken(uaaCheckTokenURL, authStr string) (int, error) {
 
 	// If status code is not 200, parse & return the error msg
 	if resp.StatusCode != http.StatusOK {
-		var payload UAACheckTokenError
+		var payload VerifyError
 		if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 			return resp.StatusCode, err
 		}
